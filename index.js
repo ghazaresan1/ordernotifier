@@ -74,7 +74,6 @@ async function authenticateUser(username, password) {
         return { success: false };
     }
 }
-
 async function checkOrders(username, password, fcmToken) {
     const user = activeUsers.get(fcmToken);
     if (!user) return;
@@ -101,19 +100,24 @@ async function checkOrders(username, password, fcmToken) {
         const newOrders = ordersResponse.data.filter(order => order.Status === 0);
         
         if (newOrders.length > 0) {
-           await admin.messaging().send({
-    token: fcmToken,  // This line is correct
-    notification: {
-        title: 'New Orders Available',
-        body: `You have ${newOrders.length} new order(s) waiting`
-    },
-    data: {
-        orderCount: newOrders.length.toString()
-    }
-});
+            const message = {
+                token: fcmToken,
+                notification: {
+                    title: 'New Orders Available',
+                    body: `You have ${newOrders.length} new order(s) waiting`
+                },
+                data: {
+                    orderCount: newOrders.length.toString()
+                }
+            };
+            
+            console.log('Sending FCM message:', message);
+            const response = await admin.messaging().send(message);
+            console.log('FCM message sent successfully:', response);
         }
     } catch (error) {
         console.error('Order check error:', error);
+        console.error('Error details:', error.errorInfo || error.message);
     }
 }
 
