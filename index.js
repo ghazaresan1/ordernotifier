@@ -101,16 +101,16 @@ async function checkOrders(username, password, fcmToken) {
         const newOrders = ordersResponse.data.filter(order => order.Status === 0);
         
         if (newOrders.length > 0) {
-            await admin.messaging().send({
-                token: fcmToken,
-                notification: {
-                    title: 'New Orders Available',
-                    body: `You have ${newOrders.length} new order(s) waiting`
-                },
-                data: {
-                    orderCount: newOrders.length.toString()
-                }
-            });
+           await admin.messaging().send({
+    token: fcmToken,  // This line is correct
+    notification: {
+        title: 'New Orders Available',
+        body: `You have ${newOrders.length} new order(s) waiting`
+    },
+    data: {
+        orderCount: newOrders.length.toString()
+    }
+});
         }
     } catch (error) {
         console.error('Order check error:', error);
