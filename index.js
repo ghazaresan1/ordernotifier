@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const admin = require('firebase-admin');
 const axios = require('axios');
@@ -7,49 +6,49 @@ const app = express();
 app.use(express.json());
 
 const SECURITY_KEY = 'Asdiw2737y#376';
-const CHECK_INTERVAL = 30000;  30 seconds
+const CHECK_INTERVAL = 30000; // 30 seconds
 
 const API_CONFIG = {
-    baseUrl 'httpsapp.ghazaresan.comapi',
-    endpoints {
-        auth 'AuthorizationAuthenticate',
-        orders 'OrdersGetOrders'
+    baseUrl: 'https://app.ghazaresan.com/api/',
+    endpoints: {
+        auth: 'Authorization/Authenticate',
+        orders: 'Orders/GetOrders'
     }
 };
 
- Initialize Firebase Admin with service account
+// Initialize Firebase Admin with service account
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 admin.initializeApp({
-    credential admin.credential.cert(serviceAccount),
-    projectId process.env.FIREBASE_PROJECT_ID
+    credential: admin.credential.cert(serviceAccount),
+    projectId: process.env.FIREBASE_PROJECT_ID
 });
 
- Store active users and their check intervals
+// Store active users and their check intervals
 const activeUsers = new Map();
 
- Endpoint to register new users
-app.post('register', async (req, res) = {
+// Endpoint to register new users
+app.post('/register', async (req, res) => {
     const { username, password, fcmToken } = req.body;
     
     try {
         const authResponse = await authenticateUser(username, password);
         if (!authResponse.success) {
-            return res.status(401).json({ error 'Invalid credentials' });
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         activeUsers.set(fcmToken, {
             username,
             password,
-            lastOrderId null,
-            checkInterval null
+            lastOrderId: null,
+            checkInterval: null
         });
         
         startChecking(fcmToken);
         
-        res.json({ success true, message 'Registration successful' });
+        res.json({ success: true, message: 'Registration successful' });
     } catch (error) {
-        console.error('Registration error', error);
-        res.status(500).json({ error 'Registration failed' });
+        console.error('Registration error:', error);
+        res.status(500).json({ error: 'Registration failed' });
     }
 });
 
@@ -60,19 +59,19 @@ async function authenticateUser(username, password) {
             username,
             password
         }, {
-            headers {
-                'Accept' 'applicationjson, textplain, ',
-                'Content-Type' 'applicationjson',
-                'securitykey' SECURITY_KEY,
-                'Origin' 'httpsportal.ghazaresan.com',
-                'Referer' 'httpsportal.ghazaresan.com'
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+                'securitykey': SECURITY_KEY,
+                'Origin': 'https://portal.ghazaresan.com',
+                'Referer': 'https://portal.ghazaresan.com/'
             }
         });
         
-        return { success true, token response.data.Token };
+        return { success: true, token: response.data.Token };
     } catch (error) {
-        console.error('Authentication error', error);
-        return { success false };
+        console.error('Authentication error:', error);
+        return { success: false };
     }
 }
 
@@ -86,35 +85,35 @@ async function checkOrders(username, password, fcmToken) {
 
         const ordersUrl = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.orders}`;
         const ordersResponse = await axios.post(ordersUrl, {
-            authorizationCode auth.token,
-            securityKey SECURITY_KEY
+            authorizationCode: auth.token,
+            securityKey: SECURITY_KEY
         }, {
-            headers {
-                'Accept' 'applicationjson, textplain, ',
-                'Content-Type' 'applicationjson',
-                'authorizationcode' auth.token,
-                'securitykey' SECURITY_KEY,
-                'Origin' 'httpsportal.ghazaresan.com',
-                'Referer' 'httpsportal.ghazaresan.com'
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+                'authorizationcode': auth.token,
+                'securitykey': SECURITY_KEY,
+                'Origin': 'https://portal.ghazaresan.com',
+                'Referer': 'https://portal.ghazaresan.com/'
             }
         });
 
-        const newOrders = ordersResponse.data.filter(order = order.Status === 0);
+        const newOrders = ordersResponse.data.filter(order => order.Status === 0);
         
-        if (newOrders.length  0) {
+        if (newOrders.length > 0) {
             await admin.messaging().send({
-                token fcmToken,
-                notification {
-                    title 'New Orders Available',
-                    body `You have ${newOrders.length} new order(s) waiting`
+                token: fcmToken,
+                notification: {
+                    title: 'New Orders Available',
+                    body: `You have ${newOrders.length} new order(s) waiting`
                 },
-                data {
-                    orderCount newOrders.length.toString()
+                data: {
+                    orderCount: newOrders.length.toString()
                 }
             });
         }
     } catch (error) {
-        console.error('Order check error', error);
+        console.error('Order check error:', error);
     }
 }
 
@@ -126,14 +125,14 @@ function startChecking(fcmToken) {
         clearInterval(user.checkInterval);
     }
 
-    user.checkInterval = setInterval(() = {
+    user.checkInterval = setInterval(() => {
         checkOrders(user.username, user.password, fcmToken);
     }, CHECK_INTERVAL);
 
     activeUsers.set(fcmToken, user);
 }
 
-app.post('unregister', (req, res) = {
+app.post('/unregister', (req, res) => {
     const { fcmToken } = req.body;
     const user = activeUsers.get(fcmToken);
     
@@ -142,10 +141,15 @@ app.post('unregister', (req, res) = {
     }
     
     activeUsers.delete(fcmToken);
-    res.json({ success true });
+    res.json({ success: true });
 });
 
-const PORT = process.env.PORT  3000;
-app.listen(PORT, () = {
+// Add health check endpoint for Koyeb
+app.get('/', (req, res) => {
+    res.json({ status: 'running' });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
