@@ -116,10 +116,10 @@ async function checkOrders(username, password, fcmToken) {
           if (newOrders.length > 0) {
            const message = {
     token: fcmToken,
-    notification: {
-        title: 'سفارش جدید غذارسان',
-        body: `You have ${newOrders.length} new order(s) waiting`
-    },
+  notification: {
+    title: 'سفارش جدید غذارسان',
+    body: `شما ${newOrders.length} سفارش جدید دارید`  // The template literal will be evaluated before sending
+},
     android: {
         priority: 'high',
         notification: {
