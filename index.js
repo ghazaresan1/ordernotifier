@@ -68,20 +68,34 @@ async function authenticateUser(username, password) {
             }
         });
         
-        return { success: true, token: response.data.Token };
+        // Add validation for response.data.Token
+        if (response.data && response.data.Token) {
+            return { success: true, token: response.data.Token };
+        }
+        return { success: false, message: 'Invalid token response' };
     } catch (error) {
-        console.error('Authentication error:', error);
-        return { success: false };
+        console.log('Auth Response:', error.response?.data);
+        return { success: false, message: error.message };
     }
 }
 async function checkOrders(username, password, fcmToken) {
+    if (!fcmToken) {
+        console.log('Missing FCM token, skipping check');
+        return;
+    }
+
     const user = activeUsers.get(fcmToken);
-    if (!user) return;
+    if (!user) {
+        console.log('User not found for token:', fcmToken);
+        return;
+    }
 
     try {
         const auth = await authenticateUser(username, password);
-        if (!auth.success) return;
-
+        if (!auth.success) {
+            console.log('Authentication failed:', auth.message);
+            return;
+        }
         const ordersUrl = `${API_CONFIG.baseUrl}${API_CONFIG.endpoints.orders}`;
         const ordersResponse = await axios.post(ordersUrl, {
             authorizationCode: auth.token,
