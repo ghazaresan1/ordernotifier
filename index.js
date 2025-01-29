@@ -117,7 +117,7 @@ async function checkOrders(username, password, fcmToken) {
             const message = {
                 token: fcmToken,
                 notification: {
-                    title: 'New Orders Available',
+                    title: 'سفارش جدید غذارسان',
                     body: `You have ${newOrders.length} new order(s) waiting`
                 },
                 data: {
