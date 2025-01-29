@@ -1,7 +1,7 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const axios = require('axios');
-
+console.log("Current server time:", new Date().toISOString());
 const app = express();
 app.use(express.json());
 
