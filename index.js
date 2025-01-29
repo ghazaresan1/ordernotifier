@@ -114,16 +114,25 @@ async function checkOrders(username, password, fcmToken) {
         const newOrders = ordersResponse.data.filter(order => order.Status === 0);
         
           if (newOrders.length > 0) {
-            const message = {
-                token: fcmToken,
-                notification: {
-                    title: 'سفارش جدید غذارسان',
-                    body: `You have ${newOrders.length} new order(s) waiting`
-                },
-                data: {
-                    orderCount: newOrders.length.toString()
-                }
-            };
+           const message = {
+    token: fcmToken,
+    notification: {
+        title: 'سفارش جدید غذارسان',
+        body: `You have ${newOrders.length} new order(s) waiting`
+    },
+    android: {
+        priority: 'high',
+        notification: {
+            channelId: 'orders_channel',
+            priority: 'max',
+            defaultSound: true,
+            defaultVibrateTimings: true
+        }
+    },
+    data: {
+        orderCount: newOrders.length.toString()
+    }
+};
             
             console.log('Sending FCM message with token:', fcmToken);
             console.log('Message payload:', JSON.stringify(message, null, 2));
