@@ -113,7 +113,7 @@ async function checkOrders(username, password, fcmToken) {
 
         const newOrders = ordersResponse.data.filter(order => order.Status === 0);
         
-        if (newOrders.length > 0) {
+          if (newOrders.length > 0) {
             const message = {
                 token: fcmToken,
                 notification: {
@@ -125,7 +125,7 @@ async function checkOrders(username, password, fcmToken) {
                 }
             };
             
-            console.log('Sending FCM message:', message);
+            console.log('Sending FCM message with token:', fcmToken);
             const response = await admin.messaging().send(message);
             console.log('FCM message sent successfully:', response);
         }
