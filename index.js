@@ -1,7 +1,7 @@
 const express = require('express');
 const admin = require('firebase-admin');
 const axios = require('axios');
-console.log("Current server time:", new Date().toISOString());
+
 const app = express();
 app.use(express.json());
 
@@ -132,6 +132,8 @@ async function checkOrders(username, password, fcmToken) {
     } catch (error) {
         console.error('Order check error:', error);
         console.error('Error details:', error.errorInfo || error.message);
+console.log("Current server time:", new Date().toISOString());
+
     }
 }
 
