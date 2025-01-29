@@ -126,13 +126,15 @@ async function checkOrders(username, password, fcmToken) {
             };
             
             console.log('Sending FCM message with token:', fcmToken);
+            console.log('Message payload:', JSON.stringify(message, null, 2));
+
             const response = await admin.messaging().send(message);
             console.log('FCM message sent successfully:', response);
         }
     } catch (error) {
         console.error('Order check error:', error);
-        console.error('Error details:', error.errorInfo || error.message);
-console.log("Current server time:", new Date().toISOString());
+console.error('Error details:', error.response ? error.response.data : error.message);
+console.log('Firebase Credentials:', process.env.FIREBASE_CREDENTIALS);
 
     }
 }
