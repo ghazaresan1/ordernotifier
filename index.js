@@ -122,11 +122,14 @@ async function checkOrders(username, password, fcmToken) {
 },
     android: {
         priority: 'high',
+        ttl: '60s',
         notification: {
             channelId: 'orders_channel',
             priority: 'max',
             defaultSound: true,
-            defaultVibrateTimings: true
+            defaultVibrateTimings: true ,
+             visibility: 'public',
+            importance: 'max'
         }
     },
     data: {
