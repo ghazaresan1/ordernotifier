@@ -128,8 +128,7 @@ async function checkOrders(username, password, fcmToken) {
             priority: 'max',
             defaultSound: true,
             defaultVibrateTimings: true ,
-             visibility: 'public',
-            importance: 'max'
+             visibility: 'public'
         }
     },
     data: {
